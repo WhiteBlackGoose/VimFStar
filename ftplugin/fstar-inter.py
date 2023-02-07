@@ -3,7 +3,7 @@ import re
 import vim
 from subprocess import PIPE,Popen
 from threading import Thread
-from multiprocessing import Queue, Empty
+from queue import Queue, Empty
 fstarpath='fstar.exe'
 fstarbusy=0
 fstarcurrentline=0
@@ -56,11 +56,11 @@ def fstar_readinter () :
 
 def fstar_writeinter (s) :
     global fst
-    fst.stdin.write(s)
+    fst.stdin.write(s.encode('utf-8'))
 
 def fstar_init () :
     global fst,interout
-    fst=Popen([fstarpath,'--in'],stdin=PIPE, stdout=PIPE,bufsize=1,close_fds=ON_POSIX)
+    fst=Popen([fstarpath,'--in'],stdin=PIPE, stdout=PIPE,close_fds=ON_POSIX)
     interout=Queue()
     t=Thread(target=fstar_enqueue_output,args=(fst.stdout,interout))
     t.daemon=True
