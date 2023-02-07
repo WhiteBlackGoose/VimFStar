@@ -3,7 +3,7 @@ import re
 import vim
 from subprocess import PIPE,Popen
 from threading import Thread
-from Queue import Queue, Empty
+from multiprocessing import Queue, Empty
 fstarpath='fstar.exe'
 fstarbusy=0
 fstarcurrentline=0
@@ -19,7 +19,7 @@ ON_POSIX = 'posix' in sys.builtin_module_names
 
 def fstar_reset_hi() :
     global fstarmatch
-    if fstarmatch != None:
+    if fstarmatch is not None:
         vim.command("call matchdelete("+str(fstarmatch)+")")
     fstarmatch=None
     return
@@ -47,10 +47,11 @@ def fstar_enqueue_output(out, queue):
 
 def fstar_readinter () :
     global interout
-    try : line = interout.get_nowait()
-    except Empty :
+    try:
+        line = interout.get_nowait()
+    except Empty:
         return None
-    else :
+    else:
         return line
 
 def fstar_writeinter (s) :
@@ -96,7 +97,7 @@ def fstar_test_code (code,keep,quickcheck=False) :
 def fstar_convert_answer(ans) :
     global fstarrequestline
     res = re.match(r"\<input\>\((\d+)\,(\d+)\-(\d+)\,(\d+)\)\: (.*)",ans)
-    if res == None :
+    if res is None :
         return ans
     return '(%d,%s-%d,%s) : %s' % (int(res.group(1))+fstarrequestline-1,res.group(2),int(res.group(3))+fstarrequestline-1,res.group(4),res.group(5))
 
@@ -105,7 +106,7 @@ def fstar_gather_answer () :
     if fstarbusy == 0 :
         return 'No verification pending'
     line=fstar_readinter()
-    while line != None :
+    while line is not None :
         if line=='ok\n' :
             fstarbusy=0
             fstarcurrentline=fstarpotentialline
@@ -123,7 +124,7 @@ def fstar_gather_answer () :
 
 def fstar_vim_query_answer () :
     r = fstar_gather_answer()
-    if r != None :
+    if r is not None:
         print(r)
 
 def fstar_get_range(firstl,lastl) :
